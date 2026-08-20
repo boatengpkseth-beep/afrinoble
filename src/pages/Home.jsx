@@ -41,7 +41,7 @@ export default function Home() {
             loop
             playsInline
             preload="auto"
-            poster="/media/look-01.jpg"
+            poster="/media/hero-poster.jpg"
             onError={() => setVideoFailed(true)}
             className="iris-reveal absolute inset-0 h-full w-full object-cover"
           >
