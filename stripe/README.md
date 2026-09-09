@@ -7,9 +7,9 @@ Clicking it opens a panel *on the site* with Stripe's Embedded Checkout —
 the buyer never leaves afrinoble. It works like this:
 
 1. The page asks `/.netlify/functions/checkout` for a session.
-2. The function looks up the product's Payment Link on your Stripe account,
-   takes the **price from that link** (so whatever you set on the link is what
-   is charged), and creates an embedded Checkout Session.
+2. The function creates an embedded Checkout Session at the **price shown on
+   the site** (`price` in `src/data/products.js`) — the catalog is the single
+   source of truth, so the form can never disagree with the product page.
 3. Stripe's form mounts inside the panel. After payment the buyer lands on
    `/order/confirmed`, which shows the house's confirmation message.
 
@@ -28,25 +28,27 @@ while on test keys.
 
 ### Payment Links currently wired
 
-| Product | Link | Price on Stripe | Price on site |
+| Product | Link | Price on the link | Charged on site |
 |---|---|---|---|
 | Adaeze Wrap Gown | buy.stripe.com/3cI4gz3a8agP4RdaHp6g808 | $120.00 | $75 |
 | Amara Silk Blouse | buy.stripe.com/28E8wP7qo4WvbfB5n56g809 | $120.00 | $75 |
 | Zola Column Dress | buy.stripe.com/eVq7sL264ex5fvReXF6g80a | $120.00 | $75 |
 | Chidinma Mini Dress | buy.stripe.com/14A28raCAfB92J55n56g80b | $120.00 | $75 |
 
-**Two things to fix in the Stripe Dashboard before real customers see this:**
+The house decided on **$75** (2026-09-09). With keys set, the on-site form
+charges $75. The links themselves still say $120 and are only reached by the
+no-key fallback — edit each one to $75 in Stripe → Payment links, or leave
+them unused.
 
-1. **The checkout page says "Gatus Pharma LLC".** That is the account's public
-   business name, and it appears on the checkout, the receipt and the card
-   statement. Stripe → Settings → Business → Public details: set the name to
-   Afrinoble (and a statement descriptor like `AFRINOBLE`).
-2. **Prices disagree.** The four links charge $120; the site lists these four
-   at $75. Decide which is right and change one side — the site in
-   `src/data/products.js`, or the price on each Payment Link.
+**Still to fix in the Stripe Dashboard before real customers see this:**
+
+1. **The public business name.** It appears on the checkout, the receipt and
+   the card statement. Stripe → Settings → Business → Public details: set the
+   name to Afrinoble (and a statement descriptor like `AFRINOBLE`).
 
 Other items are still "Enquire" until they have a Payment Link — add one
-per product, paste its URL as `paymentLink`, and the Buy button appears.
+per product, paste its URL as `paymentLink`, and the Buy button appears
+(charging the site price).
 
 ## Bulk catalog (`create-stripe-catalog.mjs`, `afrinoble-products.csv`)
 

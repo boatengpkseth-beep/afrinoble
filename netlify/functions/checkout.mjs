@@ -2,10 +2,10 @@
  * Creates a Stripe Checkout Session in EMBEDDED mode, so the payment form
  * renders inside afrinoble.netlify.app instead of redirecting to Stripe.
  *
- * The price comes from the product's Payment Link (`paymentLink` in
- * src/data/products.js): the link is looked up by URL and its line item's
- * Price is reused, so whatever the house set on the link is what is charged.
- * Links are resolved once and cached for the life of the function instance.
+ * The price charged is the one the site shows (`price` / `currency` in
+ * src/data/products.js) — the catalog is the single source of truth, so the
+ * embedded form can never disagree with the product page. The product's
+ * Payment Link is only used as the fallback when no key is configured.
  *
  * Needs STRIPE_SECRET_KEY in the Netlify environment. Without it, the site
  * falls back to opening the Payment Link itself (a redirect) — never a broken
@@ -15,33 +15,12 @@ import Stripe from 'stripe';
 import { products } from '../../src/data/products.js';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
-const priceByLink = new Map();
 
 const json = (status, body) => ({
   statusCode: status,
   headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   body: JSON.stringify(body),
 });
-
-async function priceForLink(url) {
-  if (priceByLink.has(url)) return priceByLink.get(url);
-  // Payment Link URLs are public ids; the API id is only reachable by listing.
-  let starting_after;
-  for (let page = 0; page < 10; page++) {
-    const links = await stripe.paymentLinks.list({ limit: 100, active: true, starting_after });
-    const match = links.data.find((l) => l.url === url);
-    if (match) {
-      const items = await stripe.paymentLinks.listLineItems(match.id, { limit: 1 });
-      const price = items.data[0]?.price?.id;
-      if (!price) throw new Error('Payment Link has no line item');
-      priceByLink.set(url, price);
-      return price;
-    }
-    if (!links.has_more) break;
-    starting_after = links.data[links.data.length - 1].id;
-  }
-  throw new Error('Payment Link not found on this Stripe account');
-}
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'method_not_allowed' });
@@ -60,11 +39,24 @@ export const handler = async (event) => {
 
   const origin = event.headers.origin || `https://${event.headers.host}`;
   try {
-    const price = await priceForLink(product.paymentLink);
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
       mode: 'payment',
-      line_items: [{ price, quantity }],
+      line_items: [
+        {
+          quantity,
+          price_data: {
+            currency: (product.currency || 'USD').toLowerCase(),
+            unit_amount: Math.round(product.price * 100),
+            product_data: {
+              name: product.name,
+              description: product.description,
+              images: (product.images || []).slice(0, 1).map((src) => `${origin}${src}`),
+              metadata: { slug: product.slug },
+            },
+          },
+        },
+      ],
       shipping_address_collection: { allowed_countries: ['US', 'GB', 'CA', 'GH', 'NG', 'FR', 'DE', 'NL'] },
       metadata: { slug: product.slug, size: size ?? '', product: product.name },
       payment_intent_data: { description: `${product.name}${size ? ` — size ${size}` : ''}` },
