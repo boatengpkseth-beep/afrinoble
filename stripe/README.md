@@ -16,15 +16,44 @@ the buyer never leaves afrinoble. It works like this:
 If the keys below are not set, the panel offers a "Continue to payment"
 button that opens the Payment Link instead (a redirect). Never a dead button.
 
-### Keys to add in Netlify → Site configuration → Environment variables
+### Environment variables (Netlify → Site configuration → Environment variables)
 
-| Variable | Where it comes from |
-|---|---|
-| `STRIPE_SECRET_KEY` | Stripe → Developers → API keys → Secret key (`sk_live_…`; use `sk_test_…` first) |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | same page → Publishable key (`pk_live_…` / `pk_test_…`) |
+Keys go here and nowhere else — never in the repository or in chat. A
+pre-commit hook (`.githooks/pre-commit`, enabled with
+`git config core.hooksPath .githooks`) refuses commits containing one.
 
-Then trigger a deploy. Test with Stripe's test card `4242 4242 4242 4242`
-while on test keys.
+| Variable | Required | What it is |
+|---|---|---|
+| `STRIPE_SECRET_KEY` | yes | Server key for the functions. Prefer a **restricted key** (`rk_live_…`, Developers → API keys → Create restricted key) with *Checkout Sessions: write* (add *Products: write* if Stripe returns a permissions error); a plain `sk_live_…` also works. Tick "Contains secret values". |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | yes | `pk_live_…`. Public by design; must NOT be marked secret or the build cannot read it. |
+| `STRIPE_WEBHOOK_SECRET` | yes | `whsec_…` from the webhook endpoint below. Secret. |
+| `STRIPE_AUTOMATIC_TAX` | no | `1` turns on Stripe Tax at checkout. Only after a tax registration is *Collecting* in Dashboard → Tax → Locations; without one Stripe silently collects nothing. |
+| `STRIPE_TAX_CODE` | no | Product tax code from Stripe's list (Dashboard → Tax → Settings, or docs.stripe.com/tax/tax-codes), e.g. the code for clothing. Used with automatic tax. |
+| `STRIPE_INVOICES` | no | `1` makes Stripe issue a proper invoice PDF for every paid order (Stripe charges its invoicing fee per invoice). |
+| `RESEND_API_KEY` + `ORDER_NOTIFY_EMAIL` | no | When both are set the webhook emails the atelier for each paid order (and each failed async payment). `ORDER_FROM_EMAIL` optional. |
+
+Change a variable, then **Deploys → Trigger deploy**; nothing applies until a new build.
+
+### Webhook (required — this is what fulfils an order)
+
+The confirmation page is a courtesy; the webhook is the record. Stripe calls
+`netlify/functions/stripe-webhook.mjs`, which verifies the signature, writes
+one JSON record per paid session to Netlify Blobs (Netlify → Blobs → `orders`)
+and emails the atelier if Resend is configured.
+
+1. Dashboard → Developers → Webhooks → **Add endpoint**
+2. URL: `https://afrinoble.netlify.app/.netlify/functions/stripe-webhook`
+3. Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
+4. Copy the **Signing secret** (`whsec_…`) into `STRIPE_WEBHOOK_SECRET` and redeploy.
+5. Also turn on Dashboard → Settings → Notifications → "Successful payments" email, so a human hears about every order even before Resend is set up.
+
+### Content-Security-Policy
+
+`netlify.toml` sends a CSP that allows scripts and frames only from this site
+and Stripe, fonts only from Google. It is what lets Stripe.js keep its XSS
+protection. Anything new that loads from another host must be added there.
+(Vite's dev server injects an inline script that the policy blocks — use
+`vite preview` or the live site to check the built page, not `netlify dev`.)
 
 ### Payment Links currently wired
 

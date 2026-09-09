@@ -10,8 +10,9 @@
 export const products = [
   {
     slug: 'adaeze-wrap-gown',
-    /** Stripe Payment Link for this exact item — checkout resolves its price from here. */
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
     paymentLink: 'https://buy.stripe.com/7sYfZhcKIagP0AXaHp6g80c',
+    forSale: true,
     name: 'Adaeze Wrap Gown',
     collection: 'women',
     fabric: 'kente',
@@ -89,8 +90,9 @@ export const products = [
   },
   {
     slug: 'amara-silk-blouse',
-    /** Stripe Payment Link for this exact item — checkout resolves its price from here. */
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
     paymentLink: 'https://buy.stripe.com/6oUdR9264coX5Vh2aT6g80d',
+    forSale: true,
     name: 'Amara Silk Blouse',
     collection: 'women',
     fabric: 'adinkra',
@@ -110,8 +112,9 @@ export const products = [
   },
   {
     slug: 'zola-column-dress',
-    /** Stripe Payment Link for this exact item — checkout resolves its price from here. */
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
     paymentLink: 'https://buy.stripe.com/3cIbJ13a81KjabxaHp6g80e',
+    forSale: true,
     name: 'Zola Column Dress',
     collection: 'limited-edition',
     fabric: 'bogolan',
@@ -170,6 +173,7 @@ export const products = [
   {
     slug: 'folasade-evening-caftan',
     paymentLink: 'https://buy.stripe.com/bJe7sL26460z2J502L6g80g',
+    forSale: true,
     name: 'Folasade Evening Caftan',
     collection: 'women',
     fabric: 'kitenge',
@@ -208,8 +212,9 @@ export const products = [
   },
   {
     slug: 'chidinma-mini-dress',
-    /** Stripe Payment Link for this exact item — checkout resolves its price from here. */
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
     paymentLink: 'https://buy.stripe.com/4gMbJ1eSQfB94Rd8zh6g80h',
+    forSale: true,
     name: 'Chidinma Mini Dress',
     collection: 'limited-edition',
     fabric: 'adinkra',

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { formatPrice } from '@/data/products'
 import { createCheckoutSession, loadStripe } from '@/lib/stripe'
 
@@ -83,7 +84,7 @@ export default function CheckoutDrawer({ product, size, onClose }) {
             </div>
           )}
           <div ref={mountRef} className={phase === 'embedded' ? 'p-2' : 'hidden'} />
-          {phase === 'fallback' && (
+          {phase === 'fallback' && product.paymentLink && (
             <div className="flex min-h-[24rem] flex-col items-center justify-center gap-4 px-8 text-center">
               <p className="max-w-sm text-sm leading-relaxed text-ink-950/70">
                 Checkout opens on our secure payment page for this piece.
@@ -95,6 +96,20 @@ export default function CheckoutDrawer({ product, size, onClose }) {
                 Continue to payment
               </a>
               {size && <p className="text-xs text-ink-950/50">Please mention size {size} in the order notes.</p>}
+            </div>
+          )}
+          {phase === 'fallback' && !product.paymentLink && (
+            <div className="flex min-h-[24rem] flex-col items-center justify-center gap-4 px-8 text-center">
+              <p className="max-w-sm text-sm leading-relaxed text-ink-950/70">
+                Online payment for this piece is being prepared. Write to the atelier and we will take your order by hand.
+              </p>
+              <Link
+                to="/contact"
+                onClick={onClose}
+                className="bg-ink-950 px-10 py-4 text-sm uppercase tracking-widest2 text-ivory-100 transition-colors hover:bg-gold-300 hover:text-ink-950"
+              >
+                Contact the atelier
+              </Link>
             </div>
           )}
           {phase === 'error' && (

@@ -104,7 +104,7 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {product.paymentLink ? (
+          {product.forSale ? (
             <>
               <button
                 type="button"

@@ -16,6 +16,15 @@ import { products } from '../../src/data/products.js';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const BRAND = 'Afrinoble';
+/** Labels every session in the Dashboard so this flow can be compared with others. */
+const INTEGRATION_ID = 'afrinoble-buy-now-qmvxtrkb';
+// Switches the house flips in Netlify once the matching Stripe setup exists.
+// Stripe Tax collects nothing until a registration is active, and Stripe
+// bills an invoicing fee per invoice — so both are off until asked for.
+const AUTOMATIC_TAX = process.env.STRIPE_AUTOMATIC_TAX === '1';
+const INVOICES = process.env.STRIPE_INVOICES === '1';
+/** Product tax code from Stripe's list (e.g. clothing); tax_behavior stays exclusive. */
+const TAX_CODE = process.env.STRIPE_TAX_CODE || null;
 /** Appended to the account's card-statement descriptor: e.g. `GATUS* AFRINOBLE`. */
 const STATEMENT_SUFFIX = 'AFRINOBLE';
 
@@ -61,10 +70,15 @@ export const handler = async (event) => {
             description: product.description,
             images: (product.images || []).slice(0, 1).map((src) => `${origin}${src}`),
             metadata: { slug: product.slug, brand: BRAND },
+            ...(TAX_CODE ? { tax_code: TAX_CODE } : {}),
           },
+          ...(AUTOMATIC_TAX ? { tax_behavior: 'exclusive' } : {}),
         },
       },
     ],
+    integration_identifier: INTEGRATION_ID,
+    ...(AUTOMATIC_TAX ? { automatic_tax: { enabled: true } } : {}),
+    ...(INVOICES ? { invoice_creation: { enabled: true, invoice_data: { description: `${BRAND} — ${label}`, metadata: { brand: BRAND, slug: product.slug } } } } : {}),
     shipping_address_collection: { allowed_countries: ['US', 'GB', 'CA', 'GH', 'NG', 'FR', 'DE', 'NL'] },
     metadata: { brand: BRAND, slug: product.slug, size: size ?? '', product: product.name },
     payment_intent_data: {
