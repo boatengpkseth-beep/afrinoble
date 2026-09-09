@@ -10,6 +10,8 @@
 export const products = [
   {
     slug: 'adaeze-wrap-gown',
+    /** Stripe Payment Link for this exact item — checkout resolves its price from here. */
+    paymentLink: 'https://buy.stripe.com/3cI4gz3a8agP4RdaHp6g808',
     name: 'Adaeze Wrap Gown',
     collection: 'women',
     fabric: 'kente',
@@ -87,6 +89,8 @@ export const products = [
   },
   {
     slug: 'amara-silk-blouse',
+    /** Stripe Payment Link for this exact item — checkout resolves its price from here. */
+    paymentLink: 'https://buy.stripe.com/28E8wP7qo4WvbfB5n56g809',
     name: 'Amara Silk Blouse',
     collection: 'women',
     fabric: 'adinkra',
@@ -106,6 +110,8 @@ export const products = [
   },
   {
     slug: 'zola-column-dress',
+    /** Stripe Payment Link for this exact item — checkout resolves its price from here. */
+    paymentLink: 'https://buy.stripe.com/eVq7sL264ex5fvReXF6g80a',
     name: 'Zola Column Dress',
     collection: 'limited-edition',
     fabric: 'bogolan',
@@ -201,6 +207,8 @@ export const products = [
   },
   {
     slug: 'chidinma-mini-dress',
+    /** Stripe Payment Link for this exact item — checkout resolves its price from here. */
+    paymentLink: 'https://buy.stripe.com/14A28raCAfB92J55n56g80b',
     name: 'Chidinma Mini Dress',
     collection: 'limited-edition',
     fabric: 'adinkra',

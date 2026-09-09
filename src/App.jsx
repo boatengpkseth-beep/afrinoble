@@ -14,6 +14,7 @@ import ArticleDetail from './pages/ArticleDetail'
 import Lookbook from './pages/Lookbook'
 import LookbookDetail from './pages/LookbookDetail'
 import Contact from './pages/Contact'
+import OrderConfirmed from './pages/OrderConfirmed'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <Route path="/lookbook" element={<Lookbook />} />
         <Route path="/lookbook/:slug" element={<LookbookDetail />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/order/confirmed" element={<OrderConfirmed />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

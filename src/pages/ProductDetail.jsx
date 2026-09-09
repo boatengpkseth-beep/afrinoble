@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getProductBySlug, getRelatedProducts, formatPrice } from '@/data/products'
+import CheckoutDrawer from '@/components/CheckoutDrawer'
 import { getCollectionBySlug } from '@/data/collections'
 import Reveal from '@/components/Reveal'
 import Eyebrow from '@/components/Eyebrow'
@@ -18,6 +19,7 @@ export default function ProductDetail() {
   const product = getProductBySlug(slug)
   const [activeImage, setActiveImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState(null)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
 
   if (!product) return <NotFound />
 
@@ -102,12 +104,28 @@ export default function ProductDetail() {
             </div>
           )}
 
-          <button
-            type="button"
-            className="mt-10 w-full border border-ivory-100 py-4 text-sm uppercase tracking-widest2 text-ivory-100 transition-colors duration-300 hover:bg-ivory-100 hover:text-ink-950 sm:w-auto sm:px-12"
-          >
-            Enquire
-          </button>
+          {product.paymentLink ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setCheckoutOpen(true)}
+                disabled={product.sizes?.length > 0 && !selectedSize}
+                className="mt-10 w-full bg-ivory-100 py-4 text-sm uppercase tracking-widest2 text-ink-950 transition-colors duration-300 hover:bg-gold-300 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:px-12"
+              >
+                {product.sizes?.length > 0 && !selectedSize ? 'Select a size' : 'Buy now'}
+              </button>
+              {checkoutOpen && (
+                <CheckoutDrawer product={product} size={selectedSize} onClose={() => setCheckoutOpen(false)} />
+              )}
+            </>
+          ) : (
+            <Link
+              to="/contact"
+              className="mt-10 inline-block w-full border border-ivory-100 py-4 text-center text-sm uppercase tracking-widest2 text-ivory-100 transition-colors duration-300 hover:bg-ivory-100 hover:text-ink-950 sm:w-auto sm:px-12"
+            >
+              Enquire
+            </Link>
+          )}
 
           {product.story && (
             <div className="mt-12 border-t border-ivory-100/10 pt-8">
