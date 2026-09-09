@@ -39,11 +39,22 @@ after the house dropped the price from $120).
 | Folasade Evening Caftan | buy.stripe.com/bJe7sL26460z2J502L6g80g |
 | Chidinma Mini Dress | buy.stripe.com/4gMbJ1eSQfB94Rd8zh6g80h |
 
-**Still to fix in the Stripe Dashboard before real customers see this:**
+### The account is shared with Molivite (public name "Gatus Pharma LLC")
 
-1. **The public business name.** It appears on the checkout, the receipt and
-   the card statement. Stripe → Settings → Business → Public details: set the
-   name to Afrinoble (and a statement descriptor like `AFRINOBLE`).
+The account's public name cannot be changed to Afrinoble without renaming it
+for Molivite too. So the checkout stamps the brand on everything that belongs
+to the **order** instead (`checkout.mjs`): line item "Afrinoble · <piece>",
+charge description "Afrinoble: <piece> — size", card-statement suffix
+`AFRINOBLE` (rendered `<account prefix>* AFRINOBLE`; dropped automatically if
+the account's prefix is too long for Stripe's 22-character limit), a note
+under the Pay button, and a matching line on `/order/confirmed`.
+
+What still carries the account name and cannot be overridden per order: the
+"Pay securely at …" Link line, the header of Stripe's email receipt, and the
+hosted Payment Link pages. The clean fix is a **second Stripe account named
+Afrinoble under the same login and the same LLC** (account switcher → Create
+new account); then swap the two keys in Netlify. Stripe allows one business to
+run several accounts.
 
 Other items are still "Enquire" until they have a Payment Link — add one
 per product, paste its URL as `paymentLink`, and the Buy button appears

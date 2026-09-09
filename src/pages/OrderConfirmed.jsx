@@ -48,6 +48,9 @@ export default function OrderConfirmed() {
             Every piece leaves the atelier only after it has been checked by hand, so we will write to you once yours is ready to travel.
             Made-to-order pieces are cut to your measurements; if we need them, we will ask before any cloth is cut.
           </p>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-ivory-100/50">
+            Afrinoble is a house of Gatus LLC — that is the name you may see on your receipt and card statement.
+          </p>
         </>
       )}
 

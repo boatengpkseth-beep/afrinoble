@@ -15,6 +15,9 @@ import Stripe from 'stripe';
 import { products } from '../../src/data/products.js';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+const BRAND = 'Afrinoble';
+/** Appended to the account's card-statement descriptor: e.g. `GATUS* AFRINOBLE`. */
+const STATEMENT_SUFFIX = 'AFRINOBLE';
 
 const json = (status, body) => ({
   statusCode: status,
@@ -38,30 +41,57 @@ export const handler = async (event) => {
   const size = typeof body.size === 'string' && product.sizes?.includes(body.size) ? body.size : null;
 
   const origin = event.headers.origin || `https://${event.headers.host}`;
-  try {
-    const session = await stripe.checkout.sessions.create({
-      ui_mode: 'embedded',
-      mode: 'payment',
-      line_items: [
-        {
-          quantity,
-          price_data: {
-            currency: (product.currency || 'USD').toLowerCase(),
-            unit_amount: Math.round(product.price * 100),
-            product_data: {
-              name: product.name,
-              description: product.description,
-              images: (product.images || []).slice(0, 1).map((src) => `${origin}${src}`),
-              metadata: { slug: product.slug },
-            },
+  const label = `${product.name}${size ? ` — size ${size}` : ''}`;
+
+  // The Stripe account is shared with the house's other businesses, so its
+  // public name is not Afrinoble. Everything that belongs to the ORDER is
+  // stamped with the brand instead: the line item, the charge description,
+  // the card-statement suffix and the note under the Pay button.
+  const params = (withSuffix) => ({
+    ui_mode: 'embedded',
+    mode: 'payment',
+    line_items: [
+      {
+        quantity,
+        price_data: {
+          currency: (product.currency || 'USD').toLowerCase(),
+          unit_amount: Math.round(product.price * 100),
+          product_data: {
+            name: `Afrinoble · ${product.name}`,
+            description: product.description,
+            images: (product.images || []).slice(0, 1).map((src) => `${origin}${src}`),
+            metadata: { slug: product.slug, brand: BRAND },
           },
         },
-      ],
-      shipping_address_collection: { allowed_countries: ['US', 'GB', 'CA', 'GH', 'NG', 'FR', 'DE', 'NL'] },
-      metadata: { slug: product.slug, size: size ?? '', product: product.name },
-      payment_intent_data: { description: `${product.name}${size ? ` — size ${size}` : ''}` },
-      return_url: `${origin}/order/confirmed?session_id={CHECKOUT_SESSION_ID}`,
-    });
+      },
+    ],
+    shipping_address_collection: { allowed_countries: ['US', 'GB', 'CA', 'GH', 'NG', 'FR', 'DE', 'NL'] },
+    metadata: { brand: BRAND, slug: product.slug, size: size ?? '', product: product.name },
+    payment_intent_data: {
+      description: `${BRAND}: ${label}`,
+      metadata: { brand: BRAND, slug: product.slug },
+      ...(withSuffix ? { statement_descriptor_suffix: STATEMENT_SUFFIX } : {}),
+    },
+    custom_text: {
+      submit: {
+        message: `You are ordering from ${BRAND}. ${BRAND} is a house of Gatus LLC, so that name may also appear on your receipt and card statement.`,
+      },
+    },
+    return_url: `${origin}/order/confirmed?session_id={CHECKOUT_SESSION_ID}`,
+  });
+
+  try {
+    let session;
+    try {
+      session = await stripe.checkout.sessions.create(params(true));
+    } catch (err) {
+      // The suffix rides on the account's own descriptor and the pair must fit
+      // in 22 characters. If the account's prefix is too long, sell without it
+      // rather than fail the sale.
+      if (!/statement_descriptor/i.test(err.message)) throw err;
+      console.warn('statement descriptor suffix rejected; retrying without it:', err.message);
+      session = await stripe.checkout.sessions.create(params(false));
+    }
     return json(200, { clientSecret: session.client_secret });
   } catch (err) {
     console.error('checkout session failed', err);
