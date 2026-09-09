@@ -28,17 +28,16 @@ while on test keys.
 
 ### Payment Links currently wired
 
-| Product | Link | Price on the link | Charged on site |
-|---|---|---|---|
-| Adaeze Wrap Gown | buy.stripe.com/3cI4gz3a8agP4RdaHp6g808 | $120.00 | $75 |
-| Amara Silk Blouse | buy.stripe.com/28E8wP7qo4WvbfB5n56g809 | $120.00 | $75 |
-| Zola Column Dress | buy.stripe.com/eVq7sL264ex5fvReXF6g80a | $120.00 | $75 |
-| Chidinma Mini Dress | buy.stripe.com/14A28raCAfB92J55n56g80b | $120.00 | $75 |
+All five links charge **$75**, the same as the site (re-issued 2026-09-09
+after the house dropped the price from $120).
 
-The house decided on **$75** (2026-09-09). With keys set, the on-site form
-charges $75. The links themselves still say $120 and are only reached by the
-no-key fallback — edit each one to $75 in Stripe → Payment links, or leave
-them unused.
+| Product | Link |
+|---|---|
+| Adaeze Wrap Gown | buy.stripe.com/7sYfZhcKIagP0AXaHp6g80c |
+| Amara Silk Blouse | buy.stripe.com/6oUdR9264coX5Vh2aT6g80d |
+| Zola Column Dress | buy.stripe.com/3cIbJ13a81KjabxaHp6g80e |
+| Folasade Evening Caftan | buy.stripe.com/bJe7sL26460z2J502L6g80g |
+| Chidinma Mini Dress | buy.stripe.com/4gMbJ1eSQfB94Rd8zh6g80h |
 
 **Still to fix in the Stripe Dashboard before real customers see this:**
 
