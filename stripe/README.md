@@ -41,11 +41,20 @@ The confirmation page is a courtesy; the webhook is the record. Stripe calls
 one JSON record per paid session to Netlify Blobs (Netlify → Blobs → `orders`)
 and emails the atelier if Resend is configured.
 
-1. Dashboard → Developers → Webhooks → **Add endpoint**
-2. URL: `https://afrinoble.netlify.app/.netlify/functions/stripe-webhook`
-3. Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
-4. Copy the **Signing secret** (`whsec_…`) into `STRIPE_WEBHOOK_SECRET` and redeploy.
-5. Also turn on Dashboard → Settings → Notifications → "Successful payments" email, so a human hears about every order even before Resend is set up.
+The endpoint **already exists** on the account (created 2026-09-18, id
+`we_1UGtzMIiecUBjlGC78Aec8xF`, description "Afrinoble order fulfilment"):
+
+- URL: `https://afrinoble.netlify.app/.netlify/functions/stripe-webhook`
+- Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`
+
+What is still a manual step:
+
+1. Dashboard → Developers → Webhooks → open that endpoint → **Reveal** the
+   Signing secret (`whsec_…`) and put it in `STRIPE_WEBHOOK_SECRET`, then redeploy.
+2. Also turn on Dashboard → Settings → Notifications → "Successful payments" email, so a human hears about every order even before Resend is set up.
+
+(The other endpoint on the account, `stage.molivite.com/?wc-api=wc_stripe`,
+belongs to Molivite's WooCommerce store. Leave it alone.)
 
 ### Content-Security-Policy
 
@@ -58,7 +67,9 @@ protection. Anything new that loads from another host must be added there.
 ### Payment Links currently wired
 
 All five links charge **$75**, the same as the site (re-issued 2026-09-09
-after the house dropped the price from $120).
+after the house dropped the price from $120). The five $120 products, their
+prices and their Payment Links from before the drop are archived; the only
+active Afrinoble products in the Dashboard are the $75 ones behind these links.
 
 | Product | Link |
 |---|---|
