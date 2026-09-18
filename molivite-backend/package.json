@@ -1,0 +1,17 @@
+{
+  "name": "molivite-checkout-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Netlify Functions backend for Stripe Embedded Checkout on molivite.com",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "netlify dev",
+    "test": "node test/smoke.mjs"
+  },
+  "dependencies": {
+    "stripe": "^22.6.1"
+  }
+}

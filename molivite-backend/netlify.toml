@@ -1,0 +1,43 @@
+# MoLivite checkout backend — a functions-only Netlify site.
+# Deploy this folder as its own site (Site configuration → Build settings →
+# Base directory = molivite-backend) or move it to its own repository.
+
+[build]
+  # Nothing to build: the site is only the three functions below plus the
+  # placeholder page in public/ (Netlify needs a publish directory).
+  publish = "public"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Clean URLs for the frontend. A 200 rewrite keeps the method and body, so
+# POST, GET and the OPTIONS preflight all reach the function unchanged.
+# Each function enforces its own allowed methods.
+[[redirects]]
+  from = "/create-checkout-session"
+  to = "/.netlify/functions/create-checkout-session"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/session-status"
+  to = "/.netlify/functions/session-status"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/stripe-webhook"
+  to = "/.netlify/functions/stripe-webhook"
+  status = 200
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Cache-Control = "no-store"
