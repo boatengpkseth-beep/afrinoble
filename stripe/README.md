@@ -79,22 +79,52 @@ active Afrinoble products in the Dashboard are the $75 ones behind these links.
 | Folasade Evening Caftan | buy.stripe.com/bJe7sL26460z2J502L6g80g |
 | Chidinma Mini Dress | buy.stripe.com/4gMbJ1eSQfB94Rd8zh6g80h |
 
-### The account is shared with Molivite (public name "Gatus Pharma LLC")
+### The account is shared with Molivite — one profile for both houses
 
-The account's public name cannot be changed to Afrinoble without renaming it
-for Molivite too. So the checkout stamps the brand on everything that belongs
-to the **order** instead (`checkout.mjs`): line item "Afrinoble · <piece>",
-charge description "Afrinoble: <piece> — size", card-statement suffix
-`AFRINOBLE` (rendered `<account prefix>* AFRINOBLE`; dropped automatically if
-the account's prefix is too long for Stripe's 22-character limit), a note
-under the Pay button, and a matching line on `/order/confirmed`.
+Molivite and Afrinoble sell from the same Stripe account (`acct_1SS3wIIiecUBjlGC`,
+legal entity Gatus Pharma LLC, single-member LLC, Apopka FL) with different
+products and different websites. Stripe has one public profile per account,
+so the profile names the **parent**, and each store stamps its own brand on
+its orders. The Dashboard shows the current values under Settings → Business
+→ Public details (name, description, website, support) and Settings →
+Business → Bank accounts and currencies / Payments → Statement descriptor.
+Stripe does not let an account edit its own public details through the API,
+so these are set by hand, once:
 
-What still carries the account name and cannot be overridden per order: the
-"Pay securely at …" Link line, the header of Stripe's email receipt, and the
-hosted Payment Link pages. The clean fix is a **second Stripe account named
-Afrinoble under the same login and the same LLC** (account switcher → Create
-new account); then swap the two keys in Netlify. Stripe allows one business to
-run several accounts.
+| Setting | Was (Molivite-only) | Set to (fits both) |
+|---|---|---|
+| Public business name | `Gatus Pharma LLC` | `Gatus LLC` — the name both sites already print ("a house of Gatus LLC"); the legal name stays Gatus Pharma LLC |
+| Product description | MoLivite capsules only | "Gatus LLC operates two online stores: MoLivite (molivite.com), a 10-in-1 immune-support capsule sold as 1, 3 and 6 month supplies, and Afrinoble (afrinoble.netlify.app), made-to-measure African-inspired clothing and accessories. Each order names its store on the receipt and card statement." |
+| Statement descriptor | `MOLIVITE.COM` | `GATUS LLC` |
+| Shortened descriptor (prefix) | `MOLIVITE.C` | `GATUS` — short so each store's suffix fits in 22 characters |
+| Support email | none | the inbox that answers customers for both stores (the account login `gatuspharmallc@gmail.com` is the obvious choice) |
+| Support phone | +1 407 620 7905 | keep — it is the LLC's number |
+| Business website | `molivite.com` | keep (Stripe takes one URL); Afrinoble's is named in the description |
+| Branding colours | Molivite purple `#873eff` / `#2c045d` | a neutral pair (charcoal + white) so Checkout, receipts and Link look right on both sites — or keep purple and accept it on Afrinoble |
+
+With the prefix set to `GATUS`, the card statement reads per store:
+
+- Afrinoble: `GATUS* AFRINOBLE` — `checkout.mjs` already sends the
+  `AFRINOBLE` suffix on every session (and drops it if the prefix is too long).
+- Molivite: `GATUS* MOLIVITE` — in WooCommerce → Stripe settings set the
+  **shortened statement descriptor** to `MOLIVITE`. Until that is done
+  Molivite charges read `GATUS LLC`, which is still the customer's counterparty.
+
+The receipt header, the "Pay securely at …" Link line and hosted Payment
+Link pages always show the account's public name — `Gatus LLC` once
+changed — which is exactly what both sites tell the buyer to expect.
+
+What Afrinoble stamps on the **order** itself (`checkout.mjs`): line item
+"Afrinoble · <piece>", charge description "Afrinoble: <piece> — size",
+`brand: afrinoble` metadata on the session and the payment, the suffix above,
+a note under the Pay button, and a matching line on `/order/confirmed`. Filter
+the Dashboard by that metadata (or by the `afrinoble-buy-now` integration
+identifier) to see one store's orders on their own.
+
+If the house later wants a fully separate name on receipts and Link, the clean
+fix is a **second Stripe account named Afrinoble under the same login and the
+same LLC** (account switcher → Create new account); then swap the two keys in
+Netlify. Stripe allows one business to run several accounts.
 
 Other items are still "Enquire" until they have a Payment Link — add one
 per product, paste its URL as `paymentLink`, and the Buy button appears
