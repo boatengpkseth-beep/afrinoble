@@ -16,12 +16,13 @@
   var status = document.getElementById('molivite-status');
   var checkout = null;
 
-  // 1) Buy buttons: any element with data-molivite="molivite-1-month|molivite-3-month|molivite-6-month"
+  // 1) Buy buttons: any element with data-molivite="molivite-1-month|molivite-3-month|molivite-6-month".
+  //    Do NOT add a quantity attribute: the 3- and 6-month ids ARE the bundles.
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('[data-molivite]');
     if (!btn) return;
     e.preventDefault();
-    open(btn.getAttribute('data-molivite'), Number(btn.getAttribute('data-qty') || 1));
+    open(btn.getAttribute('data-molivite'), 1); // one bundle per click — the bundle already contains its bottles
   });
 
   async function open(id, quantity) {
