@@ -57,7 +57,7 @@ export const handler = async (event) => {
   // stamped with the brand instead: the line item, the charge description,
   // the card-statement suffix and the note under the Pay button.
   const params = (withSuffix) => ({
-    ui_mode: 'embedded',
+    ui_mode: 'embedded_page',
     mode: 'payment',
     line_items: [
       {
