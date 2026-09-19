@@ -1,0 +1,69 @@
+<!-- MoLivite checkout — paste this ONE block into a Landingsite "Custom HTML / Embed" element.
+     Works on the product page (Buy buttons) AND on the /checkout return page (confirmation). -->
+
+<div id="molivite-checkout"></div>
+<p id="molivite-status" style="display:none;text-align:center;font-family:inherit"></p>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+(function () {
+  var BACKEND = 'https://molivite-checkout.netlify.app';
+  var PUBLISHABLE_KEY = 'pk_live_51SS3wIIiecUBjlGCRnEthiX7h4nEh8WtXAaLdZA5bwCO9iZ7dKogiXq2cd00l7CSePODCtJKwTxgTofpS6AHcDF800HQQALYc7';
+  var RETURN_URL = 'https://molivite.com/checkout?session_id={CHECKOUT_SESSION_ID}';
+
+  var stripe = Stripe(PUBLISHABLE_KEY);
+  var mount = document.getElementById('molivite-checkout');
+  var status = document.getElementById('molivite-status');
+  var checkout = null;
+
+  // 1) Buy buttons: any element with data-molivite="molivite-1-month|molivite-3-month|molivite-6-month"
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-molivite]');
+    if (!btn) return;
+    e.preventDefault();
+    open(btn.getAttribute('data-molivite'), Number(btn.getAttribute('data-qty') || 1));
+  });
+
+  async function open(id, quantity) {
+    try {
+      if (checkout) { checkout.destroy(); checkout = null; }
+      var res = await fetch(BACKEND + '/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: [{ id: id, quantity: quantity }], returnUrl: RETURN_URL })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.clientSecret) throw new Error(data.error || 'no client secret');
+      checkout = await stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
+      checkout.mount('#molivite-checkout');
+      mount.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      say('Sorry — checkout could not start. Please try again in a moment.');
+      console.error('molivite checkout:', err);
+    }
+  }
+
+  // 2) Return page: /checkout?session_id=cs_live_… → confirm with the backend
+  var sid = new URLSearchParams(location.search).get('session_id');
+  if (sid) {
+    fetch(BACKEND + '/session-status?session_id=' + encodeURIComponent(sid))
+      .then(function (r) { return r.json(); })
+      .then(function (s) {
+        if (s.paid) {
+          say('Thank you! Your MoLivite order is confirmed' + (s.email ? ' — a receipt is on its way to ' + s.email : '') + '.');
+        } else {
+          say('Your payment is still processing. We will email you as soon as it is confirmed.');
+        }
+      })
+      .catch(function () { say('We could not check your order status. If you were charged, your order is safe — please contact us.'); });
+  }
+
+  function say(msg) { status.textContent = msg; status.style.display = 'block'; }
+})();
+</script>
+
+<!-- Example buttons (use your own styled buttons — just add the data attribute):
+<a href="#" data-molivite="molivite-1-month">Buy MoLivite — $34.99</a>
+<a href="#" data-molivite="molivite-3-month">Buy MoLivite — $94.47</a>
+<a href="#" data-molivite="molivite-6-month">Buy MoLivite — $167.95</a>
+-->

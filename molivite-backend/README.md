@@ -77,7 +77,8 @@ const res = await fetch('https://<site>.netlify.app/create-checkout-session', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    items: [{ id: 'molivite-1-month', quantity: 1 }],
+    // id: molivite-1-month ($34.99) | molivite-3-month ($94.47) | molivite-6-month ($167.95)
+    items: [{ id: 'molivite-6-month', quantity: 1 }],
     returnUrl: 'https://molivite.com/checkout?session_id={CHECKOUT_SESSION_ID}',
   }),
 });

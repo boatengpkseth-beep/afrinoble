@@ -35,6 +35,7 @@ assert.equal((await webhook(req('GET'))).headers['Access-Control-Allow-Origin'],
 
 // Bad input
 assert.equal((await create(req('POST', { body: '{not json' }))).statusCode, 400);
+assert.deepEqual(JSON.parse((await create(req('POST', { body: JSON.stringify({ items: [{ id: 'molivite-12-month', quantity: 1 }] }) }))).body), { error: 'unknown-product' });
 assert.deepEqual(JSON.parse((await status(req('GET', { queryStringParameters: {} }))).body), { error: 'missing-session-id' });
 assert.deepEqual(JSON.parse((await status(req('GET', { queryStringParameters: { session_id: 'nope' } }))).body), { error: 'invalid-session-id' });
 
