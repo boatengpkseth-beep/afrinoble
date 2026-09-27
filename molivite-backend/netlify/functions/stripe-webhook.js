@@ -14,6 +14,7 @@
  *           checkout.session.expired
  */
 import { stripe, requireEnv, json } from '../lib/http.js';
+import { createShippoOrder } from '../lib/shippo.js';
 
 const SIGNING_SECRET = requireEnv('STRIPE_WEBHOOK_SECRET');
 
@@ -98,5 +99,15 @@ export const handler = async (event) => {
  * ---------------------------------------------------------------------------
  */
 async function fulfil(session) {
-  void session; // nothing wired yet — see the block above
+  // Shippo: the order lands in apps.goshippo.com → Orders with the buyer's
+  // address, ready for a label. Nothing is purchased automatically.
+  // order_number = session.id, so a redelivered event is rejected by Shippo
+  // as a duplicate rather than creating a second order.
+  const names = { 'molivite-1-month': '1-Month Supply', 'molivite-3-month': '3-Month Supply', 'molivite-6-month': '6-Month Supply' };
+  const id = session.metadata?.product_id ?? 'molivite-1-month';
+  await createShippoOrder(session, {
+    title: `MoLivite — ${names[id] ?? id}`,
+    sku: id,
+    quantity: Number(session.metadata?.quantity) || 1,
+  });
 }
