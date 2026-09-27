@@ -7,6 +7,8 @@
  * trusted. A paid session is written to the site's Netlify Blobs store
  * (`orders`, one JSON record per session — visible in Netlify → Blobs) and,
  * when RESEND_API_KEY + ORDER_NOTIFY_EMAIL are set, the atelier is emailed.
+ * With SHIPPO_API_KEY set, the order is also created in Shippo (once per
+ * session) so a label can be bought there.
  *
  * Dashboard → Developers → Webhooks → Add endpoint:
  *   https://afrinoble.netlify.app/.netlify/functions/stripe-webhook
@@ -15,6 +17,7 @@
  */
 import Stripe from 'stripe';
 import { getStore } from '@netlify/blobs';
+import { createShippoOrder, shippingFrom } from '../shippo.mjs';
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 const SIGNING_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -54,12 +57,24 @@ export const handler = async (event) => {
 };
 
 async function fulfil(session, eventType) {
-  const order = await record(session, 'paid', eventType);
+  // Stripe can redeliver an event; only the first delivery goes to Shippo.
+  let previous = null;
+  try {
+    previous = await getStore('orders').get(session.id, { type: 'json' });
+  } catch (err) {
+    console.error('order lookup failed', err);
+  }
+  const shippoOrderId = previous?.shippoOrderId
+    ?? await createShippoOrder(session, {
+      title: [session.metadata?.product ?? 'Afrinoble piece', session.metadata?.size ? `size ${session.metadata.size}` : null].filter(Boolean).join(' · '),
+      sku: session.metadata?.slug || null,
+    });
+  const order = await record(session, 'paid', eventType, { shippoOrderId });
   await notify(order, 'paid');
 }
 
 /** One durable record per Checkout Session; a redelivered event just rewrites it. */
-async function record(session, status, eventType) {
+async function record(session, status, eventType, extra = {}) {
   const order = {
     id: session.id,
     status,
@@ -75,10 +90,11 @@ async function record(session, status, eventType) {
       email: session.customer_details?.email ?? null,
       phone: session.customer_details?.phone ?? null,
     },
-    shipping: session.shipping_details?.address ?? session.customer_details?.address ?? null,
+    shipping: shippingFrom(session)?.address ?? null,
     paymentIntent: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id ?? null,
     createdAt: new Date((session.created ?? Date.now() / 1000) * 1000).toISOString(),
     recordedAt: new Date().toISOString(),
+    ...extra,
   };
   try {
     await getStore('orders').setJSON(session.id, order);
@@ -109,6 +125,7 @@ async function notify(order, status) {
     `Customer: ${order.customer?.name ?? '—'} · ${order.customer?.email ?? '—'} · ${order.customer?.phone ?? '—'}`,
     `Ship to: ${ship}`,
     `Stripe session: ${order.id}`,
+    order.shippoOrderId ? `Shippo order: https://apps.goshippo.com/orders/${order.shippoOrderId}` : null,
     order.paymentIntent ? `Payment: https://dashboard.stripe.com/payments/${order.paymentIntent}` : null,
   ].filter((l) => l !== null).join('\n');
   try {
