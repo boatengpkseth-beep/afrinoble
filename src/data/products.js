@@ -33,6 +33,9 @@ export const products = [
   },
   {
     slug: 'obi-tailored-coat',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/aFa28r4ec0Gfabx3eX6g80i',
+    forSale: true,
     name: 'Obi Tailored Coat',
     collection: 'men',
     fabric: 'aso-oke',
@@ -52,6 +55,9 @@ export const products = [
   },
   {
     slug: 'nia-ceremonial-set',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/28EeVd9ywbkT4Rd02L6g80j',
+    forSale: true,
     name: 'Nia Ceremonial Set',
     collection: 'wedding',
     fabric: 'aso-oke',
@@ -71,6 +77,9 @@ export const products = [
   },
   {
     slug: 'kwame-two-piece',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/8x27sL4ecgFddnJaHp6g80k',
+    forSale: true,
     name: 'Kwame Two-Piece',
     collection: 'men',
     fabric: 'kente',
@@ -134,6 +143,9 @@ export const products = [
   },
   {
     slug: 'sena-woven-clutch',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/9B6fZhdOM0GffvRaHp6g80l',
+    forSale: true,
     name: 'Sena Woven Clutch',
     collection: 'accessories',
     fabric: 'kente',
@@ -153,6 +165,9 @@ export const products = [
   },
   {
     slug: 'tobi-silk-scarf',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/28EdR9fWUbkT2J5bLt6g80m',
+    forSale: true,
     name: 'Tobi Silk Scarf',
     collection: 'accessories',
     fabric: 'ankara',
@@ -193,6 +208,9 @@ export const products = [
   },
   {
     slug: 'ekon-formal-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/00w14n4ecgFd0AX6r96g80n',
+    forSale: true,
     name: 'Ekon Formal Agbada',
     collection: 'wedding',
     fabric: 'aso-oke',
@@ -234,6 +252,9 @@ export const products = [
   },
   {
     slug: 'malik-linen-shirt',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/28E28raCA60z97t2aT6g80o',
+    forSale: true,
     name: 'Malik Linen Shirt',
     collection: 'men',
     fabric: 'bogolan',
@@ -253,6 +274,9 @@ export const products = [
   },
   {
     slug: 'tunde-agbada-set',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/bJefZh1202On2J58zh6g80p',
+    forSale: true,
     name: 'Tunde Agbada Set',
     collection: 'men',
     fabric: 'brocade',
@@ -269,6 +293,9 @@ export const products = [
   },
   {
     slug: 'sefa-kaftan-set',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/6oU3cvbGE60z97tbLt6g80q',
+    forSale: true,
     name: 'Sefa Kaftan Set',
     collection: 'men',
     fabric: 'brocade',
@@ -285,6 +312,9 @@ export const products = [
   },
   {
     slug: 'adom-agbada-set',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/cNi28rh0Y9cL83p5n56g80r',
+    forSale: true,
     name: 'Adom Agbada Set',
     collection: 'men',
     fabric: 'brocade',
@@ -301,6 +331,9 @@ export const products = [
   },
   {
     slug: 'odum-senator-set',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/eVqbJ1eSQgFd1F13eX6g80s',
+    forSale: true,
     name: 'Odum Senator Set',
     collection: 'men',
     fabric: 'brocade',
@@ -317,6 +350,9 @@ export const products = [
   },
   {
     slug: 'kwabena-medallion-set',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/3cIbJ1aCAex5abx02L6g80t',
+    forSale: true,
     name: 'Kwabena Medallion Set',
     collection: 'men',
     fabric: 'brocade',
@@ -333,6 +369,9 @@ export const products = [
   },
   {
     slug: 'jide-agbada-set',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/eVq8wPeSQagPfvR16P6g80u',
+    forSale: true,
     name: 'Jide Agbada Set',
     collection: 'men',
     fabric: 'brocade',
@@ -349,6 +388,9 @@ export const products = [
   },
   {
     slug: 'ayo-leisure-set',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/9B600jbGEgFdfvR9Dl6g80v',
+    forSale: true,
     name: 'Ayo Leisure Set',
     collection: 'men',
     fabric: 'brocade',
@@ -365,6 +407,9 @@ export const products = [
   },
   {
     slug: 'chike-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/14A6oH1209cL1F16r96g80w',
+    forSale: true,
     name: 'Chike Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -381,6 +426,9 @@ export const products = [
   },
   {
     slug: 'emeka-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/7sYeVd3a82On2J5dTB6g80x',
+    forSale: true,
     name: 'Emeka Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -397,6 +445,9 @@ export const products = [
   },
   {
     slug: 'dele-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/8x214n3a8dt12J5eXF6g80y',
+    forSale: true,
     name: 'Dele Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -413,6 +464,9 @@ export const products = [
   },
   {
     slug: 'oba-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/28E9AT6mk74D5VhaHp6g80z',
+    forSale: true,
     name: 'Oba Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -429,6 +483,9 @@ export const products = [
   },
   {
     slug: 'obasi-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/bJe6oH8usgFdfvR16P6g80A',
+    forSale: true,
     name: 'Obasi Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -445,6 +502,9 @@ export const products = [
   },
   {
     slug: 'segun-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/8x2fZhcKI74D5Vh3eX6g80B',
+    forSale: true,
     name: 'Segun Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -461,6 +521,9 @@ export const products = [
   },
   {
     slug: 'kunle-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/5kQeVdh0YcoX5Vh8zh6g80C',
+    forSale: true,
     name: 'Kunle Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -477,6 +540,9 @@ export const products = [
   },
   {
     slug: 'osei-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/5kQ8wP6mkagP2J5g1J6g80D',
+    forSale: true,
     name: 'Osei Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -493,6 +559,9 @@ export const products = [
   },
   {
     slug: 'adisa-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/bJebJ1aCA0GfcjFg1J6g80E',
+    forSale: true,
     name: 'Adisa Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -509,6 +578,9 @@ export const products = [
   },
   {
     slug: 'bayo-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/aFadR95ig9cLabx4j16g80F',
+    forSale: true,
     name: 'Bayo Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -525,6 +597,9 @@ export const products = [
   },
   {
     slug: 'nkem-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/8x2eVdh0YfB94Rd16P6g80G',
+    forSale: true,
     name: 'Nkem Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -541,6 +616,9 @@ export const products = [
   },
   {
     slug: 'rotimi-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/8x28wPh0Ydt1dnJ4j16g80H',
+    forSale: true,
     name: 'Rotimi Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -557,6 +635,9 @@ export const products = [
   },
   {
     slug: 'chidi-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/4gMfZhfWU3SrgzVaHp6g80I',
+    forSale: true,
     name: 'Chidi Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -573,6 +654,9 @@ export const products = [
   },
   {
     slug: 'jaja-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/3cIcN5cKIcoXbfB16P6g80J',
+    forSale: true,
     name: 'Jaja Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -589,6 +673,9 @@ export const products = [
   },
   {
     slug: 'mansa-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/9B6aEX120dt10AX6r96g80K',
+    forSale: true,
     name: 'Mansa Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -605,6 +692,9 @@ export const products = [
   },
   {
     slug: 'kobina-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/aFa14n8us88H83p02L6g80L',
+    forSale: true,
     name: 'Kobina Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -621,6 +711,9 @@ export const products = [
   },
   {
     slug: 'okon-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/4gM3cv7qo9cLbfB4j16g80M',
+    forSale: true,
     name: 'Okon Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
@@ -637,6 +730,9 @@ export const products = [
   },
   {
     slug: 'wale-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/9B68wPbGE0Gf4Rd2aT6g80N',
+    forSale: true,
     name: 'Wale Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
