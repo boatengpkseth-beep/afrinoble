@@ -137,7 +137,7 @@ export const products = [
     name: 'Sena Woven Clutch',
     collection: 'accessories',
     fabric: 'kente',
-    price: 380,
+    price: 80,
     currency: 'USD',
     description:
       'A structured clutch faced in handwoven cloth over a rigid shell, with a magnetic closure and cotton lining.',
@@ -156,7 +156,7 @@ export const products = [
     name: 'Tobi Silk Scarf',
     collection: 'accessories',
     fabric: 'ankara',
-    price: 240,
+    price: 80,
     currency: 'USD',
     description:
       'A generous silk square with hand-finished edges, printed in a saturated wax-print motif.',
