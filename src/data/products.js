@@ -749,6 +749,9 @@ export const products = [
   },
   {
     slug: 'tunji-agbada',
+    /** Fallback only (no keys): the hosted Stripe page for this piece. `forSale` drives the Buy button. */
+    paymentLink: 'https://buy.stripe.com/28E3cv7qo2OndnJdTB6g80O',
+    forSale: true,
     name: 'Tunji Agbada — Three Piece',
     collection: 'men',
     fabric: 'brocade',
