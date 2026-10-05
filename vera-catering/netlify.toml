@@ -1,0 +1,12 @@
+# Vera Catering Services — a single static page, no build step.
+# Deploy as its own Netlify site: Base directory = vera-catering, Publish directory = vera-catering (or ".")
+
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
