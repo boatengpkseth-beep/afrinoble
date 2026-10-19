@@ -19,26 +19,30 @@
 import { stripe, corsHeaders, originOf, json, preflight, methodNotAllowed } from '../lib/http.js';
 
 // Bundle prices match the storefront: 3-month is 10% off, 6-month 20% off
-// the straight multiple of the $34.99 bottle.
+// the straight multiple of the $34.99 bottle. One bottle is 120 capsules; at
+// 2 capsules twice a day that is still exactly a month.
+const DIRECTIONS =
+  'Take 2 capsules twice a day with food or drinks, preferably water, coffee, or tea.';
+
 const PRODUCTS = {
   'molivite-1-month': {
     id: 'molivite-1-month',
     name: 'MoLivite — 1-Month Supply',
-    description: '60 Capsules',
+    pack: '120 Capsules (1 Bottle)',
     unitAmount: 3499, // cents → $34.99
     currency: 'usd',
   },
   'molivite-3-month': {
     id: 'molivite-3-month',
     name: 'MoLivite — 3-Month Supply',
-    description: '180 Capsules (3 Bottles)',
+    pack: '360 Capsules (3 Bottles)',
     unitAmount: 9447, // cents → $94.47
     currency: 'usd',
   },
   'molivite-6-month': {
     id: 'molivite-6-month',
     name: 'MoLivite — 6-Month Supply',
-    description: '360 Capsules (6 Bottles)',
+    pack: '720 Capsules (6 Bottles)',
     unitAmount: 16795, // cents → $167.95
     currency: 'usd',
   },
@@ -102,7 +106,7 @@ export const handler = async (event) => {
           unit_amount: product.unitAmount,
           product_data: {
             name: product.name,
-            description: product.description,
+            description: `${product.pack}. ${DIRECTIONS}`,
             metadata: { product_id: product.id },
           },
         },
@@ -118,7 +122,7 @@ export const handler = async (event) => {
     automatic_tax: { enabled: false },
     metadata: { product_id: product.id, quantity: String(quantity) },
     payment_intent_data: {
-      description: `${product.name} (${product.description}) × ${quantity}`,
+      description: `${product.name} (${product.pack}) × ${quantity}`,
       metadata: { product_id: product.id, quantity: String(quantity) },
       ...(withSuffix ? { statement_descriptor_suffix: STATEMENT_SUFFIX } : {}),
     },
