@@ -13,6 +13,12 @@
  *     recorded.
  *   - Commission is the partner's rate at the time of sale, on the goods
  *     value (after discounts, before shipping and tax).
+ *   - A new sale is `pending`. It only counts as money owed once the owner
+ *     has validated it (`earned`); a refunded or cancelled order earns nothing.
+ *   - Commission is paid monthly, once at least $25 is owed.
+ *   - Each partner sits in a tier with a usual rate. Rates never change by
+ *     themselves: the overview only suggests a rise when a partner's
+ *     validated bottles in a month reach the next step.
  *   - A partner buying through their own link earns nothing.
  *   - A sale is keyed by the Stripe session id, so a redelivered webhook
  *     cannot credit it twice.
@@ -23,6 +29,29 @@ import { connectLambda, getStore } from '@netlify/blobs';
 const STORE = 'affiliates';
 const CODE = /^[a-z0-9][a-z0-9_-]{1,31}$/;
 const SITE = 'https://www.molivite.com';
+
+/** Tiers and the rate each one usually carries. An ambassador's rate is agreed one by one. */
+export const TIERS = { starter: 10, standard: 15, creator: 20, top: 25, ambassador: null };
+/** Validated bottles in one calendar month, and the rate that volume earns. */
+export const LADDER = [
+  [100, 25],
+  [50, 20],
+  [25, 18],
+  [10, 15],
+];
+export const MIN_PAYOUT_CENTS = 2500;
+const PACK = { 'molivite-1-month': 1, 'molivite-3-month': 3, 'molivite-6-month': 6 };
+
+/** The calendar month a moment falls in, by Eastern time: `2026-11`. */
+const monthOf = (when) => {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit' }).formatToParts(new Date(when));
+  return `${parts.find((p) => p.type === 'year').value}-${parts.find((p) => p.type === 'month').value}`;
+};
+const monthBefore = (month) => {
+  const [y, m] = month.split('-').map(Number);
+  return m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`;
+};
+const ladderRate = (bottles) => (LADDER.find(([min]) => bottles >= min) ?? [0, 0])[1];
 
 let testStore = null;
 /** Tests swap in an in-memory store so nothing touches Netlify. */
@@ -123,21 +152,41 @@ export async function click(event, rawCode) {
   return { ok: true };
 }
 
-function summarise(partner, sales) {
+function summarise(partner, sales, now = Date.now()) {
   const earned = sales.filter((s) => s.status === 'earned');
+  const pending = sales.filter((s) => s.status === 'pending');
+  const live = [...earned, ...pending];
   const commissionCents = earned.reduce((n, s) => n + s.commissionCents, 0);
+  const owedCents = Math.max(0, commissionCents - (partner.paidCents ?? 0));
+  const thisMonth = monthOf(now);
+  const lastMonth = monthBefore(thisMonth);
+  const bottlesIn = (rows, month) => rows.filter((s) => monthOf(s.createdAt) === month).reduce((n, s) => n + (s.bottles ?? 0), 0);
+  const validatedThisMonth = bottlesIn(earned, thisMonth);
+  const validatedLastMonth = bottlesIn(earned, lastMonth);
+  const ratePercent = Math.round(partner.rate * 1000) / 10;
+  const reached = ladderRate(Math.max(validatedThisMonth, validatedLastMonth));
   return {
     code: partner.code,
     name: partner.name,
     status: partner.status,
+    tier: partner.tier ?? '',
     rate: partner.rate,
     link: `${SITE}/?ref=${partner.code}`,
     clicks: partner.clicks ?? 0,
-    orders: earned.length,
-    salesCents: earned.reduce((n, s) => n + s.amountCents, 0),
+    orders: live.length,
+    salesCents: live.reduce((n, s) => n + s.amountCents, 0),
+    pendingCents: pending.reduce((n, s) => n + s.commissionCents, 0),
+    pendingOrders: pending.length,
     commissionCents,
     paidCents: partner.paidCents ?? 0,
-    owedCents: Math.max(0, commissionCents - (partner.paidCents ?? 0)),
+    owedCents,
+    minPayoutCents: MIN_PAYOUT_CENTS,
+    payableCents: owedCents >= MIN_PAYOUT_CENTS ? owedCents : 0,
+    bottlesThisMonth: bottlesIn(live, thisMonth),
+    validatedThisMonth,
+    validatedLastMonth,
+    // Only ever a suggestion: the owner changes the rate, and 25% needs a margin review first.
+    suggestedRatePercent: reached > ratePercent ? reached : null,
   };
 }
 
@@ -151,7 +200,7 @@ export async function dashboard(event, rawCode, key) {
   const sales = (await listAll(store, `sale/${code}/`)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return {
     ...summarise(partner, sales),
-    sales: sales.slice(0, 100).map((s) => ({ date: s.createdAt, product: s.productId, amountCents: s.amountCents, commissionCents: s.commissionCents, status: s.status })),
+    sales: sales.slice(0, 100).map((s) => ({ date: s.createdAt, product: s.productId, bottles: s.bottles ?? null, amountCents: s.amountCents, commissionCents: s.commissionCents, status: s.status })),
   };
 }
 
@@ -174,14 +223,18 @@ export async function recordSale(event, session) {
   const buyer = (session.customer_details?.email ?? '').toLowerCase();
   const self = buyer && buyer === partner.email;
   const goods = Math.max(0, (session.amount_subtotal ?? session.amount_total ?? 0) - (session.total_details?.amount_discount ?? 0));
+  const productId = session.metadata?.product_id ?? null;
+  const quantity = Math.min(99, Math.max(1, Number(session.metadata?.quantity) || 1));
   await store.setJSON(key, {
     sessionId: session.id,
     code,
-    productId: session.metadata?.product_id ?? null,
+    productId,
+    bottles: (PACK[productId] ?? 1) * quantity,
     amountCents: goods,
     rate: partner.rate,
     commissionCents: self ? 0 : Math.round(goods * partner.rate),
-    status: self ? 'own-purchase' : 'earned',
+    // Pending until the owner validates it, so a refund inside the return window is never paid out.
+    status: self ? 'own-purchase' : 'pending',
     createdAt: new Date().toISOString(),
   });
   return self ? 'own-purchase' : 'recorded';
@@ -191,6 +244,15 @@ export async function recordSale(event, session) {
 
 function privateLink(code, key) {
   return `${SITE}/partner?code=${code}#${key}`;
+}
+
+const validTier = (raw) => (typeof raw === 'string' && Object.hasOwn(TIERS, raw) ? raw : null);
+
+/** The rate asked for, or failing that the usual rate of the tier. */
+function rateFor(body, tier) {
+  const given = body.ratePercent;
+  if (given !== undefined && given !== null && given !== '') return validRate(given);
+  return tier && TIERS[tier] ? validRate(TIERS[tier]) : null;
 }
 
 function validRate(raw) {
@@ -218,7 +280,9 @@ export async function admin(event, body) {
       if (body.appId && (!app || app.status !== 'pending')) return { error: 'application-not-found' };
       const name = app?.name ?? clean(body.name, 120);
       const email = app?.email ?? clean(body.email, 254).toLowerCase();
-      const rate = validRate(body.ratePercent);
+      if (body.tier && !validTier(body.tier)) return { error: 'unknown-tier' };
+      const tier = validTier(body.tier) ?? '';
+      const rate = rateFor(body, tier);
       if (!name || !isEmail(email)) return { error: 'name-and-email-required' };
       if (rate === null) return { error: 'rate-must-be-1-to-60-percent' };
       const wanted = normaliseCode(body.code);
@@ -226,10 +290,10 @@ export async function admin(event, body) {
       if (wanted && (await store.get(`partner/${wanted}`, { type: 'json' }))) return { error: 'code-taken' };
       const code = wanted ?? (await freeCode(store, app?.preferredCode, name));
       const key = randomBytes(24).toString('base64url');
-      await store.setJSON(`partner/${code}`, { code, name, email, rate, status: 'active', keyHash: sha(key), clicks: 0, paidCents: 0, createdAt: new Date().toISOString() });
+      await store.setJSON(`partner/${code}`, { code, name, email, tier, rate, status: 'active', keyHash: sha(key), clicks: 0, paidCents: 0, createdAt: new Date().toISOString() });
       if (app) await store.setJSON(`app/${app.id}`, { ...app, status: 'approved', code });
       // The private link is shown once: only its hash is stored.
-      return { partner: { code, name, email, rate }, link: `${SITE}/?ref=${code}`, dashboardLink: privateLink(code, key) };
+      return { partner: { code, name, email, tier, rate }, link: `${SITE}/?ref=${code}`, dashboardLink: privateLink(code, key) };
     }
 
     case 'decline': {
@@ -244,6 +308,10 @@ export async function admin(event, body) {
       const partner = code && (await store.get(`partner/${code}`, { type: 'json' }));
       if (!partner) return { error: 'partner-not-found' };
       if (body.status === 'active' || body.status === 'paused') partner.status = body.status;
+      if (body.tier !== undefined) {
+        if (!validTier(body.tier)) return { error: 'unknown-tier' };
+        partner.tier = body.tier;
+      }
       if (body.ratePercent !== undefined) {
         const rate = validRate(body.ratePercent);
         if (rate === null) return { error: 'rate-must-be-1-to-60-percent' };
@@ -271,12 +339,36 @@ export async function admin(event, body) {
       return { ok: true };
     }
 
+    case 'validate-sale': {
+      // The order was delivered and kept: its commission is now owed.
+      const code = normaliseCode(body.code);
+      const key = `sale/${code}/${clean(body.sessionId, 120)}`;
+      const sale = code && (await store.get(key, { type: 'json' }));
+      if (!sale) return { error: 'sale-not-found' };
+      if (sale.status !== 'pending') return { error: 'sale-not-pending' };
+      await store.setJSON(key, { ...sale, status: 'earned', validatedAt: new Date().toISOString() });
+      return { ok: true };
+    }
+
+    case 'validate-all': {
+      // Every pending sale for one partner that is at least `olderThanDays` old.
+      const code = normaliseCode(body.code);
+      if (!code) return { error: 'partner-not-found' };
+      const days = Math.min(365, Math.max(0, Number(body.olderThanDays) || 0));
+      const cutoff = new Date(Date.now() - days * 864e5).toISOString();
+      const due = (await listAll(store, `sale/${code}/`)).filter((s) => s.status === 'pending' && s.createdAt <= cutoff);
+      const validatedAt = new Date().toISOString();
+      await Promise.all(due.map((s) => store.setJSON(`sale/${code}/${s.sessionId}`, { ...s, status: 'earned', validatedAt })));
+      return { ok: true, validated: due.length };
+    }
+
     case 'void-sale': {
       // For a refunded order: the sale stays on record but earns nothing.
       const code = normaliseCode(body.code);
       const key = `sale/${code}/${clean(body.sessionId, 120)}`;
       const sale = code && (await store.get(key, { type: 'json' }));
       if (!sale) return { error: 'sale-not-found' };
+      if (sale.status === 'own-purchase') return { error: 'sale-not-pending' };
       await store.setJSON(key, { ...sale, status: 'refunded', commissionCents: 0 });
       return { ok: true };
     }
