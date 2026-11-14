@@ -27,7 +27,7 @@ export const stripe = new Stripe(requireEnv('STRIPE_SECRET_KEY'), {
 });
 
 export { ALLOWED_ORIGINS, originOf } from './origins.js';
-import { ALLOWED_ORIGINS } from './origins.js';
+import { ALLOWED_ORIGINS, originOf } from './origins.js';
 
 export function corsHeaders(origin) {
   return {
