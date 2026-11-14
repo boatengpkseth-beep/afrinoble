@@ -26,18 +26,8 @@ export const stripe = new Stripe(requireEnv('STRIPE_SECRET_KEY'), {
   appInfo: { name: 'molivite-netlify-checkout', version: '1.0.0' },
 });
 
-/**
- * Origins allowed to call the browser-facing functions. The store itself,
- * its www alias, and Netlify Dev for local testing. Anything else gets the
- * canonical origin back, which the browser then refuses.
- */
-export const ALLOWED_ORIGINS = new Set([
-  'https://molivite.com',
-  'https://www.molivite.com',
-  // Preview address of the redesigned storefront (repo molivite-site).
-  'https://molivite-storefront.netlify.app',
-  'http://localhost:8888',
-]);
+export { ALLOWED_ORIGINS, originOf } from './origins.js';
+import { ALLOWED_ORIGINS } from './origins.js';
 
 export function corsHeaders(origin) {
   return {
@@ -47,11 +37,6 @@ export function corsHeaders(origin) {
     'Access-Control-Max-Age': '86400',
     Vary: 'Origin',
   };
-}
-
-/** The request's Origin header, however Netlify cased it. */
-export function originOf(event) {
-  return event.headers?.origin ?? event.headers?.Origin ?? '';
 }
 
 export function json(statusCode, body, extraHeaders = {}) {

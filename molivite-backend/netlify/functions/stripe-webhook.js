@@ -15,6 +15,7 @@
  */
 import { stripe, requireEnv, json } from '../lib/http.js';
 import { createShippoOrder } from '../lib/shippo.js';
+import { recordSale } from '../lib/affiliates.js';
 
 const SIGNING_SECRET = requireEnv('STRIPE_WEBHOOK_SECRET');
 
@@ -57,6 +58,13 @@ export const handler = async (event) => {
       if (session.payment_status === 'paid') {
         console.log('ORDER PAID', JSON.stringify(orderRecord(session)));
         await fulfil(session);
+        // Partner commission is bookkeeping: it must never stop an order being fulfilled.
+        try {
+          const credit = await recordSale(event, session);
+          if (credit !== 'no-code') console.log('AFFILIATE', session.metadata?.affiliate, credit, session.id);
+        } catch (err) {
+          console.error('affiliate sale not recorded:', session.id, err?.message ?? err);
+        }
       } else {
         console.log('ORDER PENDING (awaiting payment)', JSON.stringify(orderRecord(session)));
       }

@@ -35,6 +35,12 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/affiliate/*"
+  to = "/.netlify/functions/affiliate"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]

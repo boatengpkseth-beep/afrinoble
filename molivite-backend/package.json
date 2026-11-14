@@ -9,9 +9,10 @@
   },
   "scripts": {
     "dev": "netlify dev",
-    "test": "node test/smoke.mjs"
+    "test": "node test/smoke.mjs && node test/affiliates.mjs"
   },
   "dependencies": {
+    "@netlify/blobs": "^11.1.9",
     "stripe": "^22.6.1"
   }
 }
