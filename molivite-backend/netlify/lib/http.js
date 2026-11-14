@@ -34,6 +34,8 @@ export const stripe = new Stripe(requireEnv('STRIPE_SECRET_KEY'), {
 export const ALLOWED_ORIGINS = new Set([
   'https://molivite.com',
   'https://www.molivite.com',
+  // Preview address of the redesigned storefront (repo molivite-site).
+  'https://molivite-storefront.netlify.app',
   'http://localhost:8888',
 ]);
 
