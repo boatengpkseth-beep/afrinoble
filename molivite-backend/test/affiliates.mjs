@@ -17,12 +17,12 @@ lib.useStoreForTests({
 
 const origin = 'https://www.molivite.com';
 const call = async (route, { method = 'POST', body, auth, query } = {}) => {
-  const url = new URL();
+  const url = new URL(`https://molivite-checkout.netlify.app/affiliate/${route}`);
   for (const [k, v] of Object.entries(query ?? {})) url.searchParams.set(k, v);
   const res = await handler(
     new Request(url, {
       method,
-      headers: { origin, ...(auth ? { authorization:  } : {}) },
+      headers: { origin, ...(auth ? { authorization: `Bearer ${auth}` } : {}) },
       body: body === undefined ? undefined : JSON.stringify(body),
     }),
   );
