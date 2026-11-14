@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 
 const lib = await import('../netlify/lib/affiliates.js');
-const { handler } = await import('../netlify/functions/affiliate.js');
+const { default: handler } = await import('../netlify/functions/affiliate.js');
 
 const data = new Map();
 lib.useStoreForTests({
@@ -17,14 +17,17 @@ lib.useStoreForTests({
 
 const origin = 'https://www.molivite.com';
 const call = async (route, { method = 'POST', body, auth, query } = {}) => {
-  const res = await handler({
-    httpMethod: method,
-    path: `/affiliate/${route}`,
-    headers: { origin, ...(auth ? { authorization: `Bearer ${auth}` } : {}) },
-    body: body === undefined ? undefined : JSON.stringify(body),
-    queryStringParameters: query,
-  });
-  return { status: res.statusCode, body: res.body ? JSON.parse(res.body) : null, headers: res.headers };
+  const url = new URL();
+  for (const [k, v] of Object.entries(query ?? {})) url.searchParams.set(k, v);
+  const res = await handler(
+    new Request(url, {
+      method,
+      headers: { origin, ...(auth ? { authorization:  } : {}) },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
+  );
+  const text = await res.text();
+  return { status: res.status, body: text ? JSON.parse(text) : null, headers: Object.fromEntries([...res.headers].map(([k, v]) => [k.toLowerCase(), v])) };
 };
 const session = (id, code, extra = {}) => ({
   id,
@@ -38,7 +41,7 @@ const session = (id, code, extra = {}) => ({
 // CORS lets the admin page send its key
 const pre = await call('admin', { method: 'OPTIONS' });
 assert.equal(pre.status, 204);
-assert.match(pre.headers['Access-Control-Allow-Headers'], /Authorization/);
+assert.match(pre.headers['access-control-allow-headers'], /Authorization/);
 
 // Admin is closed until a key exists, then needs the right one
 delete process.env.AFFILIATE_ADMIN_KEY;

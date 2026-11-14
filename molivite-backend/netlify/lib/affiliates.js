@@ -30,10 +30,19 @@ export function useStoreForTests(store) {
   testStore = store;
 }
 
+/**
+ * The store. Called with no event from the current-format function
+ * (affiliate.js), where strong consistency is available, so an approval is
+ * visible to the very next read. Called with the Lambda event from the Stripe
+ * webhook, which is an older-format function: there the store has to be
+ * connected by hand and only eventual consistency is offered. That is fine
+ * for the webhook, which only adds a sale under a key unique to the order.
+ */
 function db(event) {
   if (testStore) return testStore;
+  if (!event) return getStore({ name: STORE, consistency: 'strong' });
   connectLambda(event);
-  return getStore({ name: STORE, consistency: 'strong' });
+  return getStore(STORE);
 }
 
 export const normaliseCode = (raw) => {
